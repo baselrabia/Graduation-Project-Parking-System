@@ -1,33 +1,30 @@
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(A0, A1, A2, A3, A4, A5);
+LiquidCrystal lcd(0, 1, 2, 3, 4, 5);
  // Creates an LCD object. Parameters: (rs, enable, d4, d5, d6, d7) 
 
 #include <Keypad.h>
 const byte ROWS = 4; 
 const byte COLS = 4; 
 char hexaKeys[ROWS][COLS] = {
-  {'1', '2', '3', 'A'},
-  {'4', '5', '6', 'B'},
-  {'7', '8', '9', 'C'},
-  {'*', '0', '#', 'D'}
+  {'1', '2'},
+  {'3', '4'},
 };
-byte rowPins[ROWS] = {9, 8, 7, 6}; 
-byte colPins[COLS] = {5, 4, 3, 2}; 
-Keypad Keypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
+byte rowPins[ROWS] = {7, 6}; 
+byte colPins[COLS] = {9, 8}; 
+Keypad newkeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
 
 #include <Servo.h>
 Servo servo[4];
 int i;
-int time[4]= {0,0,0,0};
+int timecar[4]= {0,0,0,0};
 int cost[4]= {0,0,0,0};
 int pos[4];
 
 // sensor ir 
-const int place[]={13,12,11,10};
+const int place[]={A0,A1,A2,A3};
 byte val[4];
 
-int millis;
-
+int millistime;
 
 
 
@@ -36,10 +33,10 @@ void setup() {
 	for(int r=0;r<5;r++)
      {pinMode(place[r], INPUT);}
  // imp tip : i do not know how to get pins for servo so this is fake pins and need edit before burn ...
-  servo[0].attach(5); 
-  servo[1].attach(6); 
-  servo[2].attach(7); 
-  servo[3].attach(8);   
+  servo[0].attach(10); 
+  servo[1].attach(11); 
+  servo[2].attach(12); 
+  servo[3].attach(13);   
 
   Serial.begin(9600);
   lcd.begin(16,2); 
@@ -50,6 +47,8 @@ void setup() {
 }
 
 
+
+
 void loop() { 
  
  for (int c=0; c<4; c++) {
@@ -57,11 +56,11 @@ void loop() {
  }
 
 for (int x=0; x<4; x++) { 
-	if(val[x]==LOW){
+	if(val[x]==0){
 		closeServo(x);
-		 millis = millis() ;
-		time[x] = millis /30000 //time by min and min equal 30 s to be more faster 
-		cost[x] = time[x] / 2 //cost of min by egp as hour equal 30 egp
+		 millistime = millis() ;
+		timecar[x] = millistime /5000 //time by min and min equal  5 s to be more faster 
+		cost[x] = timecar[x] / 2 //cost of min by egp as hour equal 30 egp
 
 	       }
 }
@@ -69,29 +68,30 @@ for (int x=0; x<4; x++) {
 
 lcd.setCursor(0, 0);
 lcd.print("1-"); 
-lcd.print(time[0]); //prints time since program started
+lcd.print(timecar[0]); //prints time since program started
    delay(1000);
 lcd.print("min-"); 
 lcd.print(cost[0]);
 lcd.print("EGP//")
 lcd.print("2-"); 
-lcd.print(time[1]); //prints time since program started
+lcd.print(timecar[1]); //prints time since program started
    delay(1000);
 lcd.print("min-"); 
 lcd.print(cost[1]);
 lcd.print("EGP")
 
+
 //second row print
 
 lcd.setCursor(0, 1);
 lcd.print("3-"); 
-lcd.print(time[2]); //prints time since program started
+lcd.print(timecar[2]); //prints time since program started
    delay(1000);
 lcd.print("min-"); 
 lcd.print(cost[2]);
 lcd.print("EGP//")
 lcd.print("4-"); 
-lcd.print(time[3]); //prints time since program started
+lcd.print(timecar[3]); //prints time since program started
    delay(1000);
 lcd.print("min-"); 
 lcd.print(cost[3]);
@@ -123,7 +123,7 @@ delay(1000);
 
 // for keypad click to open one parking place .. and print number in serial com
 
-  char key = keypad.getKey();
+  char key = newkeypad.getKey();
 
 if (Key == 1){
   openServo(0);
@@ -148,8 +148,8 @@ void openServo(i)
     Serial.println(Key);
 	for (pos[i] = 0; pos[i]  <= 40; pos[i]  += 1) { servo[i].write(pos[i]);delay(30);} 
     delay(2000);   
-    time[x] = 0; 
-	cost[x] = 0;    
+    timecar[i] = 0; 
+	cost[i] = 0;    
 }
 
 void closeServo(x)
